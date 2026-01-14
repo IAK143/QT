@@ -63,6 +63,10 @@ const App: React.FC = () => {
     const [isLiveBoard, setIsLiveBoard] = useState(false);
     const ignoreNextBoardUpdate = useRef(false);
 
+    // Settings State
+    const [geminiKey, setGeminiKey] = useState<string>('');
+    const [isKeyVisible, setIsKeyVisible] = useState(false);
+
     const activeChannel = channels.find(c => c.id === activeChannelId) || channels[0];
 
     useEffect(() => {
@@ -92,6 +96,9 @@ const App: React.FC = () => {
             setIdeaNodes(savedBoard.nodes);
             setIdeaConnections(savedBoard.connections);
         }
+
+        const savedKey = storageService.getGeminiKey();
+        if (savedKey) setGeminiKey(savedKey);
     }, []);
 
     // 2. Initialize Peer Service
@@ -317,7 +324,9 @@ const App: React.FC = () => {
 
                 const botMessage: ChatMessage = {
                     id: (Date.now() + 1).toString(),
+                    senderId: 'QT',
                     senderName: 'QT',
+                    timestamp: Date.now(),
                     content: answer,
                     channelId: activeChannelId,
                     type: 'text',
@@ -539,6 +548,11 @@ const App: React.FC = () => {
         }
     };
 
+    const handleSaveGeminiKey = (key: string) => {
+        setGeminiKey(key);
+        storageService.saveGeminiKey(key);
+    };
+
     // --- RENDERING VIEWS ---
 
     if (showLanding) {
@@ -717,6 +731,45 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
                                 <p className="text-xs text-slate-400 mt-2">Share this ID with others so they can invite you.</p>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <Zap size={20} className="text-slate-400" /> AI Configuration
+                                </h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="text-xs font-bold uppercase text-slate-400 mb-2">Gemini API Key</div>
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <input
+                                                    type={isKeyVisible ? "text" : "password"}
+                                                    value={geminiKey}
+                                                    onChange={(e) => handleSaveGeminiKey(e.target.value)}
+                                                    placeholder="Enter your Gemini API key..."
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:border-slate-400 transition-all font-mono text-sm"
+                                                />
+                                                <button
+                                                    onClick={() => setIsKeyVisible(!isKeyVisible)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                >
+                                                    {isKeyVisible ? <Minimize size={14} /> : <Maximize size={14} />}
+                                                </button>
+                                            </div>
+                                            {geminiKey && (
+                                                <button
+                                                    onClick={() => { if (confirm("Clear API key?")) handleSaveGeminiKey(''); }}
+                                                    className="px-3 rounded-lg border border-red-100 text-red-500 hover:bg-red-50 transition-colors"
+                                                >
+                                                    Clear
+                                                </button>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-slate-400 mt-2">
+                                            Your key is stored locally in your browser. Get one from the <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Google AI Studio</a>.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">

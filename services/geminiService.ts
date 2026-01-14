@@ -1,10 +1,14 @@
 
+import { storageService } from "./storageService";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AnalysisResult, ChatInsight, ChatMessage, BrainMessage, Workspace } from "../types";
 import { fileToBase64 } from "../utils/fileHelpers";
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Dynamic initialization of AI client
+const getAIClient = (): GoogleGenAI => {
+  const key = storageService.getGeminiKey() || process.env.GEMINI_API_KEY || process.env.API_KEY || "";
+  return new GoogleGenAI({ apiKey: key });
+};
 
 const docResponseSchema: Schema = {
   type: Type.OBJECT,
@@ -85,7 +89,7 @@ export const analyzeDocument = async (file: File): Promise<AnalysisResult> => {
     const base64Data = await fileToBase64(file);
     const mimeType = file.type;
 
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [
@@ -134,7 +138,7 @@ export const analyzeConversation = async (messages: ChatMessage[]): Promise<Chat
       `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.senderName}: ${m.type === 'analysis' ? `Shared a document analysis for: ${m.attachment?.documentType}` : m.content}`
     ).join('\n');
 
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [{ text: `Analyze this team chat log and provide insights:\n\n${transcript}` }]
@@ -158,7 +162,7 @@ export const analyzeConversation = async (messages: ChatMessage[]): Promise<Chat
 export const queryDocument = async (context: AnalysisResult, question: string): Promise<string> => {
   try {
     const contextString = JSON.stringify(context, null, 2);
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [{ text: `Context: ${contextString}\n\nQuestion: ${question}\n\nAnswer the question concisely based on the context provided.` }]
@@ -176,7 +180,7 @@ export const queryDocument = async (context: AnalysisResult, question: string): 
 
 export const askBot = async (question: string): Promise<string> => {
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: question,
       config: {
@@ -213,7 +217,7 @@ export const runSecondBrain = async (history: BrainMessage[], newMessage: string
       systemInstruction += " The user is asking for help making a decision. Act as a Rational Decision Engine. 1. Clarify the objective. 2. Identify constraints. 3. List options with Pros/Cons. 4. Provide a concrete recommendation. Be objective and direct.";
     }
 
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview', // Stronger model for brain
       contents: contents,
       config: {
@@ -234,7 +238,7 @@ export const processSheetCommand = async (data: string[][], prompt: string): Pro
     // Create a CSV context
     const csvContext = data.map(row => row.join(',')).join('\n');
 
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [{
@@ -280,7 +284,7 @@ export const consultWorkspace = async (workspace: Workspace, message: string): P
         ${workspace.sections.map(s => `- ${s.title}: ${s.content || "(Empty)"}`).join('\n')}
         `;
 
-    const response = await ai.models.generateContent({
+    const response = await getAIClient().models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [{

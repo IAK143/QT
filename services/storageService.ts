@@ -7,7 +7,8 @@ const KEYS = {
   MESSAGES: 'nexus_messages',
   IDEAS: 'nexus_ideas',
   WORKSPACES: 'nexus_workspaces',
-  DOC_CHATS: 'nexus_doc_chats'
+  DOC_CHATS: 'nexus_doc_chats',
+  GEMINI_KEY: 'nexus_gemini_key'
 };
 
 export const storageService = {
@@ -71,6 +72,14 @@ export const storageService = {
       const chats = storageService.getAllDocChats();
       chats[docId] = messages;
       localStorage.setItem(KEYS.DOC_CHATS, JSON.stringify(chats));
+  },
+
+  // --- Gemini Key ---
+  saveGeminiKey: (key: string) => {
+    localStorage.setItem(KEYS.GEMINI_KEY, key);
+  },
+  getGeminiKey: (): string | null => {
+    return localStorage.getItem(KEYS.GEMINI_KEY);
   },
 
   // --- Clear ---
