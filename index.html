@@ -1,130 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QT - Private Workspace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: { sans: ['Inter', 'sans-serif'] },
-            animation: {
-              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'fade-in': 'fadeIn 0.3s ease-out forwards',
-              'scale-in': 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'float': 'float 6s ease-in-out infinite',
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'shimmer': 'shimmer 2s linear infinite',
-              'neural-pulse': 'neuralPulse 3s infinite ease-in-out',
-              'orb-float': 'orbFloat 8s infinite ease-in-out',
-            },
-            keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              scaleIn: {
-                '0%': { opacity: '0', transform: 'scale(0.95)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-10px)' },
-              },
-              shimmer: {
-                '0%': { backgroundPosition: '-200% 0' },
-                '100%': { backgroundPosition: '200% 0' },
-              },
-              neuralPulse: {
-                '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
-                '50%': { opacity: '1', transform: 'scale(1.05)' },
-              },
-              orbFloat: {
-                 '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' },
-                 '33%': { transform: 'translate(10px, -15px) rotate(5deg)' },
-                 '66%': { transform: 'translate(-5px, 10px) rotate(-5deg)' },
-              }
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body { font-family: 'Inter', sans-serif; }
-      
-      /* Custom scrollbar */
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-      
-      .precision-gradient-text {
-        background: linear-gradient(90deg, #4285F4, #9B72CB, #D96570);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-      }
-      .hero-gradient {
-        background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.1) 0%, rgba(0, 0, 0, 0) 50%);
-      }
-      /* Markdown Styles */
-      .markdown-body h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; margin-top: 1rem; }
-      .markdown-body h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 1rem; }
-      .markdown-body h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 0.75rem; }
-      .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
-      .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-      .markdown-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-      .markdown-body li { margin-bottom: 0.25rem; }
-      .markdown-body strong { font-weight: 600; color: #1e293b; }
-      .markdown-body blockquote { border-left: 3px solid #cbd5e1; padding-left: 1rem; color: #64748b; margin-bottom: 1rem; }
-      
-      /* Horizontal Scroll for Code & Tables */
-      .markdown-body table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9em; white-space: nowrap; }
-      .markdown-body th, .markdown-body td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: left; }
-      .markdown-body th { background-color: #f8fafc; font-weight: 600; }
-      
-      .markdown-body pre { background: #f1f5f9; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
-      .markdown-body code { font-family: monospace; font-size: 0.9em; background: rgba(0,0,0,0.05); padding: 0.2em 0.4em; rounded: 0.25rem; }
-      .markdown-body pre code { background: transparent; padding: 0; }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
-    "clsx": "https://esm.sh/clsx@^2.1.1",
-    "peerjs": "https://esm.sh/peerjs@1.5.2",
-    "html-to-image": "https://esm.sh/html-to-image@1.11.11",
-    "xlsx": "https://esm.sh/xlsx@^0.18.5",
-    "react-markdown": "https://esm.sh/react-markdown@9.0.1",
-    "remark-gfm": "https://esm.sh/remark-gfm@4.0.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+
+<head>
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QT - Private Workspace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-[#fcfcfc] text-slate-900 antialiased overflow-hidden selection:bg-slate-900 selection:text-white">
-    <div id="root"></div>
+
+<body class="bg-[#fcfcfc] text-slate-900 antialiased overflow-hidden selection:bg-slate-900 selection:text-white">
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+/* Any additional custom styles can go here */
+@theme {
+    --animate-fade-in-up: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-fade-in: fadeIn 0.3s ease-out forwards;
+    --animate-scale-in: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-shimmer: shimmer 2s linear infinite;
+    --animate-neural-pulse: neuralPulse 3s infinite ease-in-out;
+    --animate-orb-float: orbFloat 8s infinite ease-in-out;
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes scaleIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes neuralPulse {
+
+        0%,
+        100% {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes orbFloat {
+
+        0%,
+        100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        33% {
+            transform: translate(10px, -15px) rotate(5deg);
+        }
+
+        66% {
+            transform: translate(-5px, 10px) rotate(-5deg);
+        }
+    }
+}
+
+@layer base {
+    body {
+        @apply font-sans;
+    }
+}
+
+@layer components {
+    .precision-gradient-text {
+        background: linear-gradient(90deg, #4285F4, #9B72CB, #D96570);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .hero-gradient {
+        background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.1) 0%, rgba(0, 0, 0, 0) 50%);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #cbd5e1;
+    }
+
+    /* Markdown Styles */
+    .markdown-body h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .markdown-body h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .markdown-body h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .markdown-body p {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+    }
+
+    .markdown-body ul {
+        list-style-type: disc;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .markdown-body ol {
+        list-style-type: decimal;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .markdown-body li {
+        margin-bottom: 0.25rem;
+    }
+
+    .markdown-body strong {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .markdown-body blockquote {
+        border-left: 3px solid #cbd5e1;
+        padding-left: 1rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+    }
+
+    /* Horizontal Scroll for Code & Tables */
+    .markdown-body table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+
+    .markdown-body th,
+    .markdown-body td {
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    .markdown-body th {
+        background-color: #f8fafc;
+        font-weight: 600;
+    }
+
+    .markdown-body pre {
+        background: #f1f5f9;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .markdown-body code {
+        font-family: monospace;
+        font-size: 0.9em;
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.2em 0.4em;
+        border-radius: 0.25rem;
+    }
+
+    .markdown-body pre code {
+        background: transparent;
+        padding: 0;
+    }
+}
