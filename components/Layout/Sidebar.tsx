@@ -17,6 +17,8 @@ interface SidebarProps {
   onAddPeer: (peerId: string) => void;
   onAcceptPeer: (peerId: string) => void;
   onRejectPeer: (peerId: string) => void;
+  isOnline: boolean;
+  isKeyVerified: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -29,7 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   unreadCounts,
   onChangeView,
   onSelectChannel,
-  onCreateChannel
+  onCreateChannel,
+  isOnline,
+  isKeyVerified
 }) => {
   const [isCreating, setIsCreating] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
@@ -68,11 +72,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             onClick={() => onChangeView('second-brain')}
+            disabled={!isOnline || !isKeyVerified}
+            title={!isOnline ? "Requires Internet Connection" : (!isKeyVerified ? "Requires Verified API Key" : "")}
             className={cn(
               "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mb-1",
               activeView === 'second-brain'
                 ? "bg-slate-100 text-slate-900 shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
+              (!isOnline || !isKeyVerified) && "opacity-50 cursor-not-allowed hover:bg-transparent"
             )}
           >
             <Brain size={18} className={activeView === 'second-brain' ? "text-purple-600" : "text-slate-400"} />
@@ -93,11 +100,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
           <button
             onClick={() => onChangeView('analysis')}
+            disabled={!isOnline || !isKeyVerified}
+            title={!isOnline ? "Requires Internet Connection" : (!isKeyVerified ? "Requires Verified API Key" : "")}
             className={cn(
               "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
               activeView === 'analysis'
                 ? "bg-slate-100 text-slate-900 shadow-sm"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
+              (!isOnline || !isKeyVerified) && "opacity-50 cursor-not-allowed hover:bg-transparent"
             )}
           >
             <FileText size={18} className={activeView === 'analysis' ? "text-slate-900" : "text-slate-400"} />

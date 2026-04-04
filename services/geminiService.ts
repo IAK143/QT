@@ -10,6 +10,20 @@ const getAIClient = (): GoogleGenAI => {
   return new GoogleGenAI({ apiKey: key });
 };
 
+export const verifyApiKey = async (key: string): Promise<boolean> => {
+  try {
+    const client = new GoogleGenAI({ apiKey: key });
+    await client.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: { parts: [{ text: "Test" }] },
+    });
+    return true;
+  } catch (e) {
+    console.error("API Key Verification Failed", e);
+    return false;
+  }
+};
+
 const docResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {

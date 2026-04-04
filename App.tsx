@@ -9,11 +9,12 @@ import Onboarding from './components/Onboarding/Onboarding';
 import LandingPage from './components/Layout/LandingPage';
 import { CommandPalette } from './components/ui/CommandPalette';
 import { Channel, ChatMessage, AnalysisResult, ChatInsight, IdeaNode, IdeaConnection, UserProfile, PeerUser, ConnectionRequest, ReplyContext, IdeaBoardData } from './types';
-import { analyzeDocument, analyzeConversation, askBot } from './services/geminiService';
+import { analyzeDocument, analyzeConversation, askBot, verifyApiKey } from './services/geminiService';
 import { peerService } from './services/peerService';
 import { storageService } from './services/storageService';
+import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
 import { fileToBase64 } from './utils/fileHelpers';
-import { Users, UserPlus, Check, X, Copy, ArrowUpRight, Loader2, UserMinus, Maximize, Minimize, Brain, MessageSquare, Layout, FileText, Zap } from 'lucide-react';
+import { Users, UserPlus, Check, X, Copy, ArrowUpRight, Loader2, UserMinus, Maximize, Minimize, Brain, MessageSquare, Layout, FileText, Zap, Shield, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { cn } from './utils/cn';
 
 const App: React.FC = () => {
@@ -57,6 +58,12 @@ const App: React.FC = () => {
     const [chatInsight, setChatInsight] = useState<ChatInsight | null>(null);
     const [isAnalyzingChat, setIsAnalyzingChat] = useState(false);
 
+    // Security & Infrastructure State
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [isKeyVerified, setIsKeyVerified] = useState(false);
+    const [isVerifyingKey, setIsVerifyingKey] = useState(false);
+    const [tutorialStep, setTutorialStep] = useState(0);
+
     // Idea Board State
     const [ideaNodes, setIdeaNodes] = useState<IdeaNode[]>([]);
     const [ideaConnections, setIdeaConnections] = useState<IdeaConnection[]>([]);
@@ -98,7 +105,29 @@ const App: React.FC = () => {
         }
 
         const savedKey = storageService.getGeminiKey();
-        if (savedKey) setGeminiKey(savedKey);
+        if (savedKey) {
+            setGeminiKey(savedKey);
+            // Auto-verify if key exists
+            verifyApiKey(savedKey).then(isValid => setIsKeyVerified(isValid));
+        }
+
+        // Check if first run for tutorial
+        const hasRunTutorial = localStorage.getItem('qt_tutorial_complete');
+        if (!hasRunTutorial && !savedProfile) {
+            setTutorialStep(1); // Start tutorial for new users
+        }
+    }, []);
+
+    // 1.5 Monitor Online Status
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
     }, []);
 
     // 2. Initialize Peer Service
@@ -531,6 +560,10 @@ const App: React.FC = () => {
         peerService.connectToPeer(peerId);
         setSentRequests(prev => [...prev, peerId]);
         setShowInvitePopup(peerId);
+
+        if (tutorialStep === 3) {
+            setTutorialStep(4);
+        }
     };
 
     const handleCancelInvite = (peerId: string) => {
@@ -550,7 +583,19 @@ const App: React.FC = () => {
 
     const handleSaveGeminiKey = (key: string) => {
         setGeminiKey(key);
+        setIsKeyVerified(false); // Reset verification on change
         storageService.saveGeminiKey(key);
+    };
+
+    const handleVerifyKey = async () => {
+        if (!geminiKey) return;
+        setIsVerifyingKey(true);
+        const isValid = await verifyApiKey(geminiKey);
+        setIsKeyVerified(isValid);
+        setIsVerifyingKey(false);
+        if (isValid && tutorialStep === 2) {
+            setTutorialStep(3); // Advance tutorial if on that step
+        }
     };
 
     // --- RENDERING VIEWS ---
@@ -620,6 +665,12 @@ const App: React.FC = () => {
 
     return (
         <div className="h-screen w-screen flex bg-slate-50 overflow-hidden font-sans text-slate-900 relative animate-fade-in">
+            <TutorialOverlay
+                step={tutorialStep}
+                onNext={() => setTutorialStep(prev => prev + 1)}
+                onSkip={() => setTutorialStep(0)}
+            />
+
             {/* Global Elements */}
             <CommandPalette isOpen={isCmdPaletteOpen} onClose={() => setIsCmdPaletteOpen(false)} actions={actions} />
 
@@ -663,6 +714,8 @@ const App: React.FC = () => {
                     onAddPeer={handleAddPeer}
                     onAcceptPeer={handleAcceptRequest}
                     onRejectPeer={handleRejectRequest}
+                    isOnline={isOnline}
+                    isKeyVerified={isKeyVerified}
                 />
             )}
 
@@ -739,7 +792,18 @@ const App: React.FC = () => {
                                 </h3>
                                 <div className="space-y-4">
                                     <div>
-                                        <div className="text-xs font-bold uppercase text-slate-400 mb-2">Gemini API Key</div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="text-xs font-bold uppercase text-slate-400">Gemini API Key</div>
+                                            {isKeyVerified ? (
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                                                    <ShieldCheck size={12} /> Verified
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                                    <AlertTriangle size={12} /> Unverified
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex gap-2">
                                             <div className="relative flex-1">
                                                 <input
@@ -747,7 +811,10 @@ const App: React.FC = () => {
                                                     value={geminiKey}
                                                     onChange={(e) => handleSaveGeminiKey(e.target.value)}
                                                     placeholder="Enter your Gemini API key..."
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:border-slate-400 transition-all font-mono text-sm"
+                                                    className={cn(
+                                                        "w-full bg-slate-50 border rounded-lg px-4 py-2 focus:outline-none transition-all font-mono text-sm",
+                                                        isKeyVerified ? "border-emerald-200 focus:border-emerald-400" : "border-slate-200 focus:border-slate-400"
+                                                    )}
                                                 />
                                                 <button
                                                     onClick={() => setIsKeyVisible(!isKeyVisible)}
@@ -756,6 +823,16 @@ const App: React.FC = () => {
                                                     {isKeyVisible ? <Minimize size={14} /> : <Maximize size={14} />}
                                                 </button>
                                             </div>
+                                            {!isKeyVerified && geminiKey && (
+                                                <button
+                                                    onClick={handleVerifyKey}
+                                                    disabled={isVerifyingKey}
+                                                    className="px-4 rounded-lg bg-black text-white hover:opacity-90 transition-opacity font-bold text-sm disabled:opacity-50 flex items-center gap-2"
+                                                >
+                                                    {isVerifyingKey ? <Loader2 size={14} className="animate-spin" /> : <Shield size={14} />}
+                                                    {isVerifyingKey ? "Checking..." : "Verify"}
+                                                </button>
+                                            )}
                                             {geminiKey && (
                                                 <button
                                                     onClick={() => { if (confirm("Clear API key?")) handleSaveGeminiKey(''); }}
@@ -766,7 +843,8 @@ const App: React.FC = () => {
                                             )}
                                         </div>
                                         <p className="text-xs text-slate-400 mt-2">
-                                            Your key is stored locally in your browser. Get one from the <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Google AI Studio</a>.
+                                            Your key is stored locally. Verification is required to unlock AI features like Thought Lab and Document Room.
+                                            Get one from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Google AI Studio</a>.
                                         </p>
                                     </div>
                                 </div>
